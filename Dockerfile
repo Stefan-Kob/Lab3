@@ -1,17 +1,19 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /source
+WORKDIR /src
 
-# Copy sln and restore (copies csproj preserving paths)
-COPY . ./
-RUN dotnet restore "Lab3.sln"
+# Copy csproj and restore as single project
+COPY ["WeekApi.csproj", "./"]
+RUN dotnet restore "WeekApi.csproj"
 
-# Publish specific project
-RUN dotnet publish "Week5Api/Week5Api.csproj" -c release -o /app --no-restore
+# Copy source and publish
+COPY . .
+WORKDIR "/src"
+RUN dotnet publish "WeekApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Runtime stage (unchanged)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-COPY --from=build /app .
-
-ENTRYPOINT ["dotnet", "Week5Api.dll"]
+COPY --from=build /app/publish .
+EXPOSE 10000
+ENTRYPOINT ["dotnet", "WeekApi.dll"]
