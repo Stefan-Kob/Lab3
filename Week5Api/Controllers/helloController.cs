@@ -9,6 +9,6 @@ public class HelloController : ControllerBase
     [HttpGet("/hello")]
     public string Get()
     {
-        return "Hello from your Azure API running .NET 10";
+        return "Your API has been updated through CI and CD";
     }
 }
